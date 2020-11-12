@@ -2,6 +2,7 @@ import pyodbc  # Importing pyodbc to connect with and manipulate our database
 import pandas as pd  # Importing pandas to handle the csv file
 
 
+# Creating our class which will store all of the functionality
 class Movies:
     # Method to connect to our database
     def connect(self):
@@ -31,6 +32,7 @@ class Movies:
                        "VARCHAR(255), isAdult INT, startYear INT, endYear INT, runtimeMinutes INT,  genres VARCHAR("
                        "50));")
 
+    # Method to insert a movie to the database based on input from the user
     def insert_movies(self):
         print("To add your movie to the database we'll just have to collect some information from you.")
         media_type = input("Please input the type of media (i.e. 'movie', 'video', or 'videoGame' etc.):  ")
@@ -51,19 +53,27 @@ class Movies:
     # Function that takes text data and inputs it into our database
     def text_to_database(self, filename):
         cursor = self.connect()
-        text_file = open(filename, 'r')
+        text_file = open(filename, 'r')  # Opens the file
         for line in text_file:
+            # Inserts what's stored on each line into primaryTitle attribute of the table
             cursor.execute(f"INSERT INTO Jamie_IMDB_Movies (primaryTitle) VALUES ('{line}')")
 
     # Function that retrieves everything in our database and converts it into a text file
     def database_to_text(self):
-        pass
-
-
-    def sql_show_movie(self, table_name, movie_title):
         cursor = self.connect()
-        movie_info = cursor.execute(f"SELECT * FROM {table_name} WHERE primaryTitle = '{movie_title}';")
-        return movie_info
+        # Retrieving all of the data stored in our table
+        all_data = cursor.execute("SELECT * FROM Jamie_IMDB_Movies;")
+        # Writing to a file or creating one if it doesn't already exist
+        writer = open('downloaded_movies.text', 'w')
+        # Inputting the name of the film in each record into the text file
+        for rows in all_data:
+            writer.write(str(rows.primaryTitle))
+
+    # Method that connects to the DB and returns the result of the query statement searching for the given movie
+    def sql_show_movie(self, table_name, movie_title):
+            cursor = self.connect()
+            movie_info = cursor.execute(f"SELECT * FROM {table_name} WHERE primaryTitle = '{movie_title}';")
+            return movie_info
 
     # Method to show a movies information when provided the movie title
     def python_show_movie(self, filename, movie_title):
@@ -97,8 +107,5 @@ test = Movies()
 # Inserting movies into the db
 # test.insert_movies()
 # test.database_to_text()
-test.text_to_database("film_names.text")
-
-# ,
-#                                names = ['titleType', 'primaryTitle', 'originalTitle', 'isAdult', 'startYear',
-#                                           'endYear', 'runtimeMinutes', 'genres']
+# test.text_to_database("film_names.text")
+test.database_to_text()
