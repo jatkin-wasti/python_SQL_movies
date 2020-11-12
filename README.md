@@ -48,6 +48,7 @@ Acceptance Criteria
 - Feel free to copy and paste the contents of my ```imdbtitle.csv``` into a newly created csv file within your Pycharm
  project
 ## Iteration 1
+### This first attempt I've used pure python methods to try and meet the acceptance criteria
 - First we'll create our py file and import pyodbc and pandas, which will let us connect to the database and handle
  the csv file
 ```
@@ -115,6 +116,7 @@ class Movies:
 
 ```
 ## Iteration 2
+### This increment uses actual SQL statements to meet the acceptance criteria
 - Creating a method to create a table with the appropriate column names and data types
 ```
 # Method to create the table in the database from the csv file information
