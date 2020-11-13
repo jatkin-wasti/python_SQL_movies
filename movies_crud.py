@@ -1,5 +1,6 @@
 import pyodbc  # Importing pyodbc to connect with and manipulate our database
 import pandas as pd  # Importing pandas to handle the csv file
+import csv  # Importing csv to handle the csv file in a better way
 
 
 # Creating our class which will store all of the functionality
@@ -30,7 +31,49 @@ class Movies:
         cursor.execute("CREATE TABLE Jamie_IMDB_Movies (titleType VARCHAR(255), primaryTitle VARCHAR(255), "
                        "originalTitle "
                        "VARCHAR(255), isAdult INT, startYear INT, endYear INT, runtimeMinutes INT,  genres VARCHAR("
-                       "50));")
+                       "255));")
+
+    # This method takes and formats the csv data in a way that allows us to insert each row into our database
+    def csv_to_database(self):
+        # Calling our connection method to execute SQL statements later on
+        cursor = self.connect()
+        # Creating a list that we'll dump our csv data into
+        self.movies_list = []
+        with open("imdbtitles.csv", "r") as csv_file:
+            reader = csv.reader(csv_file)
+            for row in reader:
+                self.movies_list.append(row)
+        # Formatting the header as odd characters appear at the start of them
+        self.movies_list[0][0] = self.movies_list[0][0][3:]
+        # For every non header row we'll create a string containing the values to be input to the table
+        for rows in self.movies_list[1:]:
+            values = ", ".join(str(word) for word in rows)
+            # Splitting the string up to handle the genre field which may have multiple values separated by commas
+            attributes_list = values.split(", ")
+            # If there are multiple attributes we'll concatenate them
+            if len(attributes_list) > 8:
+                for _ in range(8, len(attributes_list) - 1):
+                    attributes_list[7] += attributes_list[_]
+            # Constructing our SQL statement
+            sql_query = f"INSERT INTO Jamie_IMDB_Movies VALUES ("
+            for _ in range(3):
+                sql_query = sql_query + "'" + attributes_list[_] + "', "
+            for _ in range(3, 7):
+                if str(attributes_list[_]).isdigit():
+                    sql_query = sql_query + attributes_list[_] + ", "
+                else: sql_query = sql_query + "0" + ", "
+            sql_query = sql_query + "'" + attributes_list[7] + "'"
+            sql_query = sql_query + ");"
+            # It will try to insert each row into the table using our SQL statement
+            try:
+                print(sql_query)
+                cursor.execute(sql_query)
+                print("This insert was successful")
+            # If this fails we'll output a message to the user
+            except:
+                print("This insert was unsuccessful")
+        return "Movies have been added to the database!"
+
 
     # Method to insert a movie to the database based on input from the user
     def insert_movies(self):
@@ -108,4 +151,5 @@ test = Movies()
 # test.insert_movies()
 # test.database_to_text()
 # test.text_to_database("film_names.text")
-test.database_to_text()
+# test.database_to_text()
+print(test.csv_to_database())

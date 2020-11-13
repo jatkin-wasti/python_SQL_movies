@@ -54,6 +54,7 @@ Acceptance Criteria
 ```
 import pyodbc  # Importing pyodbc to connect with and manipulate our database
 import pandas as pd  # Importing pandas to handle the csv file
+import csv  # Importing csv to handle the csv file in a better way
 ```
 - Creating our class
 ```
@@ -63,7 +64,7 @@ class Movies:
 - Creating a method that establishes a connection to the database and returns a cursor that we'll use to execute our
  SQL statements later on
 ```
-# Method to connect to our database
+    # Method to connect to our database
     def connect(self):
         # We will connect to our Northwind DB which we've already used in the SQL week
         server = "databases1.spartaglobal.academy"
@@ -127,6 +128,57 @@ class Movies:
                        "VARCHAR(255), isAdult INT, startYear INT, endYear INT, runtimeMinutes INT,  genres VARCHAR("
                        "50));")
 ```
+- We'll create a method that will read in data from our csv file and then insert that data into our created database
+- We'll use our imported csv module to read from the file and we'll change values that would cause errors (i.e. if a
+ value in the file is '\N' to signify that it is empty we need to change this value to a number if that column should
+  be an int). We'll change these values to 0.
+- We'll also handle multiple genres by concatenating them and then we'll put all of these normalised values into our
+ sql statement and run it
+- Things might still go wrong though, so we should think ahead and put the insert statement in a try block and use
+ except to print a message to our users if something went wrong 
+```
+    # This method takes and formats the csv data in a way that allows us to insert each row into our database
+    def csv_to_database(self):
+        # Calling our connection method to execute SQL statements later on
+        cursor = self.connect()
+        # Creating a list that we'll dump our csv data into
+        self.movies_list = []
+        with open("imdbtitles.csv", "r") as csv_file:
+            reader = csv.reader(csv_file)
+            for row in reader:
+                self.movies_list.append(row)
+        # Formatting the header as odd characters appear at the start of them
+        self.movies_list[0][0] = self.movies_list[0][0][3:]
+        # For every non header row we'll create a string containing the values to be input to the table
+        for rows in self.movies_list[1:]:
+            values = ", ".join(str(word) for word in rows)
+            # Splitting the string up to handle the genre field which may have multiple values separated by commas
+            attributes_list = values.split(", ")
+            # If there are multiple attributes we'll concatenate them
+            if len(attributes_list) > 8:
+                for _ in range(8, len(attributes_list) - 1):
+                    attributes_list[7] += attributes_list[_]
+            # Constructing our SQL statement
+            sql_query = f"INSERT INTO Jamie_IMDB_Movies VALUES ("
+            for _ in range(3):
+                sql_query = sql_query + "'" + attributes_list[_] + "', "
+            for _ in range(3, 7):
+                if str(attributes_list[_]).isdigit():
+                    sql_query = sql_query + attributes_list[_] + ", "
+                else: sql_query = sql_query + "0" + ", "
+            sql_query = sql_query + "'" + attributes_list[7] + "'"
+            sql_query = sql_query + ");"
+            # It will try to insert each row into the table using our SQL statement
+            try:
+                print(sql_query)
+                cursor.execute(sql_query)
+                print("This insert was successful")
+            # If this fails we'll output a message to the user
+            except:
+                print("This insert was unsuccessful")
+        return "Movies have been added to the database!"
+```
+
 - Getting data on the requested movie with a cursor executing an SQL statement on the database instead of searching
  through the file data itself
 ```
