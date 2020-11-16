@@ -48,7 +48,7 @@ Acceptance Criteria
 - Feel free to copy and paste the contents of my ```imdbtitle.csv``` into a newly created csv file within your Pycharm
  project
 ## Iteration 1
-### This first attempt I've used pure python methods to try and meet the acceptance criteria
+### This first attempt I've used pure python methods to try and meet some of the initial acceptance criteria
 - First we'll create our py file and import pyodbc and pandas, which will let us connect to the database and handle
  the csv file
 ```
@@ -61,7 +61,7 @@ import csv  # Importing csv to handle the csv file in a better way
 # Creating our class which will store all of the functionality
 class Movies:
 ```
-- Creating a method that establishes a connection to the database and returns a cursor that we'll use to execute our
+- We'll create a method that establishes a connection to the database and returns a cursor that we'll use to execute our
  SQL statements later on
 ```
     # Method to connect to our database
@@ -79,22 +79,25 @@ class Movies:
         cursor = northwind_connection.cursor()
         return cursor
 ```
-- Creating a method that that takes a csv file and converts it to a dataframe object which it then returns
+- Creating a method that that takes a csv file and converts it to a dataframe object which it then returns so that we
+ can use this in other methods
 ```
     # Method to read a file using pandas and returning the dataframe created
     def read_file(self, filename):
         csv_file = pd.read_csv(filename)
         return csv_file
 ```
-- Creating a method to read and get all of the movie data from the CSV
+- Now we have to get data from the file, so we'll create a method to read and get all of the movie data from the CSV and
+ save it to a variable that is returned
 ```
     # Method to read a file using pandas and returning the dataframe created
     def read_file(self, filename):
         csv_file = pd.read_csv(filename)
         return csv_file
 ```
-- Creating a method to loop through the file we've read, finding the required movie and returning the information on
- that movie
+- One of the acceptance criteria was to search for a specific movie, so let's create a method to do that 
+- This method will loop through the file we've read, finding the required movie and printing the information on
+ that movie to the user
 ```
     # Method to show a movies information when provided the movie title
     def python_show_movie(self, filename, movie_title):
@@ -211,7 +214,7 @@ class Movies:
 
 ```
 - Creating a method that takes a plain text file with film names on their own lines and inserts those films into the
- database
+ database with null values for all other attributes
 ```
     # Function that takes text data and inputs it into our database
     def text_to_database(self, filename):
@@ -221,7 +224,7 @@ class Movies:
             # Inserts what's stored on each line into primaryTitle attribute of the table
             cursor.execute(f"INSERT INTO Jamie_IMDB_Movies (primaryTitle) VALUES ('{line}')")
 ```
-- Creating a method that gets all of the data out of the table and puts each record in a new line in a newly created
+- Creating a method that gets all of the data out of the table and puts each record on a new line in a newly created
  text file
 ```
     # Function that retrieves everything in our database and converts it into a text file
